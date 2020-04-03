@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>IoT Group 5</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <span class="navbar-brand mb-0 h1">IoT Group 5 Project Data</span>
+    </nav>
+    <div class="container">
+        <canvas id="line-chart" width="800" height="450"></canvas>
+    </div>
+    <div class="container">
+        <canvas id="bar_chart" width="800" height="450"></canvas>
+    </div>
+</body>
+</html>
+<script>
+    var greenhouse_data = [
+        {% for i in range(greenhouse_len) %}
+        {
+            "greenhouse_id": {{greenhouse_data[i][0]}},
+            "temp": {{greenhouse_data[i][1]}},
+            "humidity": {{greenhouse_data[i][2]}},
+            "time": "{{greenhouse_data[i][3]}}"
+        },
+        {% endfor %}
+    ];
+
+    var time_labels = [];
+    var temp_labels = [];
+    var humidity_labels = [];
+
+    for(i = 0; i < greenhouse_data.length; i++) {
+        time_labels.push(greenhouse_data[i]["time"]);
+        temp_labels.push(greenhouse_data[i]["temp"]);
+        humidity_labels.push(greenhouse_data[i]["humidity"]);
+    }
+
+    new Chart(document.getElementById("line-chart"), {
+        type: 'line',
+        data: {
+            labels: time_labels,
+            datasets: [{ 
+                data: temp_labels,
+                label: "Temperature (°C)",
+                borderColor: "#3e95cd",
+                fill: false
+            },
+            { 
+                data: humidity_labels,
+                label: "Humidity (%)",
+                borderColor: "#e8c3b9",
+                fill: false
+            },
+            ]
+        },
+        options: {
+            title: {
+            display: true,
+            text: "Legend"
+            }
+        }
+    });
+
+
+    var temp_avg = [];
+    var humid_avg = [];
+
+    let temp_size = temp_labels.length;
+    temp_avg = temp_labels.reduce((previous, current) => current += previous);
+    temp_avg /= temp_size;
+
+    let humid_size = humidity_labels.length;
+    humid_avg = humidity_labels.reduce((previous, current) => current += previous);
+    humid_avg /= humid_size;
+
+    var color = Chart.helpers.color;
+    var barChartData = {
+
+        datasets: [{
+            label: 'Temperature (°C)',
+            backgroundColor: "#3e95cd",
+            borderColor: "#3e95cd",
+            borderWidth: 1,
+            data: [temp_avg]
+        }, {
+            label: 'Humidity (%)',
+            backgroundColor: "#e8c3b9",
+            borderColor: "#e8c3b9",
+            borderWidth: 1,
+            data: [humid_avg]
+        }]
+
+    };
+    new Chart(document.getElementById('bar_chart'), {
+        type: 'bar',
+        data: barChartData,
+        options: {
+            responsive: true,
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Average Temperature & Humidity'
+            },
+            scales:{
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true,
+                        min: 0,
+                        max: 100    
+                    }
+                  }]
+               }
+        }
+    });
+</script>
